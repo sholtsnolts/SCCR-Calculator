@@ -11,6 +11,7 @@
       "sccrRating": 65,
       "interruptingRating": 65,
       "ocpdAmps": 100,
+      "isFusedDisconnect": true,
       "source": "Eaton datasheet"
     },
     {

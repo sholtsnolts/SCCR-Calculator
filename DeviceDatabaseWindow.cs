@@ -146,6 +146,7 @@ namespace SccrWpfApp
             AddColumn("IR", nameof(DeviceDatabaseEntry.InterruptingRating), 75);
             AddColumn("OCPD A", nameof(DeviceDatabaseEntry.OcpdAmps), 80);
             AddColumn("Input A", nameof(DeviceDatabaseEntry.InputCurrentAmps), 80);
+            AddColumn("Fused Disc.", nameof(DeviceDatabaseEntry.IsFusedDisconnect), 85);
             AddColumn("Fuse Mfg", nameof(DeviceDatabaseEntry.FuseManufacturer), 110);
             AddColumn("Fuse Part", nameof(DeviceDatabaseEntry.FusePartNumber), 120);
             AddColumn("Fuse IPN", nameof(DeviceDatabaseEntry.FuseInternalPartNumber), 100);
@@ -414,6 +415,7 @@ namespace SccrWpfApp
             target.InterruptingRating = source.InterruptingRating;
             target.OcpdAmps = source.OcpdAmps;
             target.InputCurrentAmps = source.InputCurrentAmps;
+            target.IsFusedDisconnect = source.IsFusedDisconnect;
             target.FuseManufacturer = source.FuseManufacturer;
             target.FusePartNumber = source.FusePartNumber;
             target.FuseInternalPartNumber = source.FuseInternalPartNumber;

@@ -17,6 +17,7 @@ namespace SccrWpfApp.Models
         private double? _interruptingRating; // For OCPDs, in kA
         private double? _ocpdAmps; // Ampere rating used for conductor sizing
         private double? _inputCurrentAmps; // Input current for power conversion equipment
+        private bool _isFusedDisconnect = false;
         private string _fuseManufacturer = "";
         private string _fusePartNumber = "";
         private string _fuseInternalPartNumber = "";
@@ -92,6 +93,12 @@ namespace SccrWpfApp.Models
         {
             get => _inputCurrentAmps;
             set { _inputCurrentAmps = value; OnPropertyChanged(nameof(InputCurrentAmps)); }
+        }
+
+        public bool IsFusedDisconnect
+        {
+            get => _isFusedDisconnect;
+            set { _isFusedDisconnect = value; OnPropertyChanged(nameof(IsFusedDisconnect)); }
         }
 
         public string FuseManufacturer

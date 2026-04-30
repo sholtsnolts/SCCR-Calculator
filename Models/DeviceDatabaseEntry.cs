@@ -43,6 +43,9 @@ namespace SccrWpfApp.Models
         [JsonPropertyName("inputCurrentAmps")]
         public double? InputCurrentAmps { get; set; }
 
+        [JsonPropertyName("isFusedDisconnect")]
+        public bool IsFusedDisconnect { get; set; }
+
         [JsonPropertyName("fuseManufacturer")]
         public string FuseManufacturer { get; set; } = "";
 
@@ -87,6 +90,7 @@ namespace SccrWpfApp.Models
                 InterruptingRating = InterruptingRating,
                 OcpdAmps = OcpdAmps,
                 InputCurrentAmps = InputCurrentAmps,
+                IsFusedDisconnect = IsFusedDisconnect,
                 FuseManufacturer = FuseManufacturer,
                 FusePartNumber = FusePartNumber,
                 FuseInternalPartNumber = FuseInternalPartNumber,
@@ -116,6 +120,7 @@ namespace SccrWpfApp.Models
                 InterruptingRating = device.InterruptingRating,
                 OcpdAmps = device.OcpdAmps,
                 InputCurrentAmps = device.InputCurrentAmps,
+                IsFusedDisconnect = device.IsFusedDisconnect,
                 FuseManufacturer = device.FuseManufacturer,
                 FusePartNumber = device.FusePartNumber,
                 FuseInternalPartNumber = device.FuseInternalPartNumber,
@@ -145,6 +150,7 @@ namespace SccrWpfApp.Models
                 InterruptingRating = InterruptingRating,
                 OcpdAmps = OcpdAmps,
                 InputCurrentAmps = InputCurrentAmps,
+                IsFusedDisconnect = IsFusedDisconnect,
                 FuseManufacturer = FuseManufacturer,
                 FusePartNumber = FusePartNumber,
                 FuseInternalPartNumber = FuseInternalPartNumber,

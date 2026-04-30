@@ -20,6 +20,7 @@ namespace SccrWpfApp
         private readonly TextBox _interruptingTextBox = new();
         private readonly TextBox _ocpdAmpsTextBox = new();
         private readonly TextBox _inputCurrentAmpsTextBox = new();
+        private readonly CheckBox _isFusedDisconnectCheckBox = new();
         private readonly TextBox _fuseManufacturerTextBox = new();
         private readonly TextBox _fusePartNumberTextBox = new();
         private readonly TextBox _fuseInternalPartNumberTextBox = new();
@@ -83,6 +84,9 @@ namespace SccrWpfApp
             AddTextField(panel, "OCPD Interrupting Rating (kA):", _interruptingTextBox);
             AddTextField(panel, "OCPD Amp Rating:", _ocpdAmpsTextBox);
             AddTextField(panel, "Input Current (A):", _inputCurrentAmpsTextBox);
+            _isFusedDisconnectCheckBox.Content = "Fused disconnect";
+            _isFusedDisconnectCheckBox.Margin = new Thickness(160, 8, 0, 0);
+            panel.Children.Add(_isFusedDisconnectCheckBox);
             AddTextField(panel, "Fuse Manufacturer:", _fuseManufacturerTextBox);
             AddTextField(panel, "Fuse Part Number:", _fusePartNumberTextBox);
             AddTextField(panel, "Fuse IPN:", _fuseInternalPartNumberTextBox);
@@ -212,6 +216,7 @@ namespace SccrWpfApp
             _interruptingTextBox.Text = FormatNumber(Entry.InterruptingRating);
             _ocpdAmpsTextBox.Text = FormatNumber(Entry.OcpdAmps);
             _inputCurrentAmpsTextBox.Text = FormatNumber(Entry.InputCurrentAmps);
+            _isFusedDisconnectCheckBox.IsChecked = Entry.IsFusedDisconnect;
             _fuseManufacturerTextBox.Text = Entry.FuseManufacturer;
             _fusePartNumberTextBox.Text = Entry.FusePartNumber;
             _fuseInternalPartNumberTextBox.Text = Entry.FuseInternalPartNumber;
@@ -245,6 +250,7 @@ namespace SccrWpfApp
             Entry.InterruptingRating = ParseNullableDouble(_interruptingTextBox.Text);
             Entry.OcpdAmps = ParseNullableDouble(_ocpdAmpsTextBox.Text);
             Entry.InputCurrentAmps = ParseNullableDouble(_inputCurrentAmpsTextBox.Text);
+            Entry.IsFusedDisconnect = _isFusedDisconnectCheckBox.IsChecked == true;
             Entry.FuseManufacturer = _fuseManufacturerTextBox.Text.Trim();
             Entry.FusePartNumber = _fusePartNumberTextBox.Text.Trim();
             Entry.FuseInternalPartNumber = _fuseInternalPartNumberTextBox.Text.Trim();

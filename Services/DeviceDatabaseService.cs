@@ -203,6 +203,7 @@ namespace SccrWpfApp.Services
             target.InterruptingRating = source.InterruptingRating;
             target.OcpdAmps = source.OcpdAmps;
             target.InputCurrentAmps = source.InputCurrentAmps;
+            target.IsFusedDisconnect = source.IsFusedDisconnect;
             target.FuseManufacturer = source.FuseManufacturer;
             target.FusePartNumber = source.FusePartNumber;
             target.FuseInternalPartNumber = source.FuseInternalPartNumber;

@@ -312,6 +312,8 @@ public partial class MainWindow : Window
         var device = node.Device;
         NormalizeFuseAssemblyDevice(node);
         var isFuseBlockAssembly = IsFuseBlockAssembly(node.DeviceType);
+        var isDisconnect = IsDisconnect(node.DeviceType);
+        var hasFuseSection = isFuseBlockAssembly || (isDisconnect && device.IsFusedDisconnect);
 
         // Device properties
         if (isFuseBlockAssembly)
@@ -339,34 +341,57 @@ public partial class MainWindow : Window
         AddPropertyNumericField(panel, "OCPD Interrupting Rating (kA):", device.InterruptingRating, (value) => device.InterruptingRating = value);
         AddPropertyNumericField(panel, "OCPD Amp Rating:", device.OcpdAmps, (value) => device.OcpdAmps = value);
         AddPropertyNumericField(panel, "Input Current (A):", device.InputCurrentAmps, (value) => device.InputCurrentAmps = value);
+
+        if (isDisconnect)
+        {
+            var fusedDisconnectCheckBox = new CheckBox
+            {
+                Content = "Fused disconnect",
+                IsChecked = device.IsFusedDisconnect,
+                Margin = new Thickness(120, 8, 0, 4)
+            };
+            fusedDisconnectCheckBox.Checked += (_, _) =>
+            {
+                device.IsFusedDisconnect = true;
+                DisplayNodeProperties(node);
+            };
+            fusedDisconnectCheckBox.Unchecked += (_, _) =>
+            {
+                device.IsFusedDisconnect = false;
+                DisplayNodeProperties(node);
+            };
+            panel.Children.Add(fusedDisconnectCheckBox);
+        }
         
         // Fuse properties with let-through lookup
-        if (isFuseBlockAssembly)
+        if (hasFuseSection)
         {
-            AddSectionHeader(panel, "Fuse");
+            AddSectionHeader(panel, isDisconnect ? "Disconnect Fuses" : "Fuse");
             AddPropertyField(panel, "Fuse Mfg:", device.FuseManufacturer, (value) => device.FuseManufacturer = value);
             AddPropertyField(panel, "Fuse Part #:", device.FusePartNumber, (value) => device.FusePartNumber = value);
             AddPropertyField(panel, "Fuse IPN:", device.FuseInternalPartNumber, (value) => device.FuseInternalPartNumber = value);
-        }
 
-        AddPropertyField(panel, "Fuse Class:", device.FuseClass, (value) => 
-        { 
-            device.FuseClass = value;
-            RefreshFuseLetThroughDisplay(panel, device, node);
-        });
-        
-        AddPropertyNumericField(panel, "Fuse Amps:", device.FuseAmps, (value) => 
-        { 
-            device.FuseAmps = value;
-            RefreshFuseLetThroughDisplay(panel, device, node);
-        });
-        
-        AddPropertyNumericField(panel, "Let-Through Current (kA):", device.LetThroughCurrent, (value) => device.LetThroughCurrent = value);
-        
-        // Display fuse let-through table if class and amps are available
-        if (!string.IsNullOrWhiteSpace(device.FuseClass) && device.FuseAmps.HasValue && device.FuseAmps > 0)
-        {
-            DisplayFuseLetThroughTable(panel, device);
+            AddPropertyField(panel, "Fuse Class:", device.FuseClass, (value) => 
+            { 
+                device.FuseClass = value;
+                RefreshFuseLetThroughDisplay(panel, device, node);
+            });
+            
+            AddPropertyNumericField(panel, "Fuse Amps:", device.FuseAmps, (value) => 
+            { 
+                device.FuseAmps = value;
+                if (!device.OcpdAmps.HasValue)
+                    device.OcpdAmps = value;
+                RefreshFuseLetThroughDisplay(panel, device, node);
+            });
+            
+            AddPropertyNumericField(panel, "Let-Through Current (kA):", device.LetThroughCurrent, (value) => device.LetThroughCurrent = value);
+            
+            // Display fuse let-through table if class and amps are available
+            if (!string.IsNullOrWhiteSpace(device.FuseClass) && device.FuseAmps.HasValue && device.FuseAmps > 0)
+            {
+                DisplayFuseLetThroughTable(panel, device);
+            }
         }
         
         AddPropertyField(panel, "Notes:", device.Notes, (value) => device.Notes = value);
@@ -760,9 +785,15 @@ public partial class MainWindow : Window
         return NormalizeDeviceType(deviceType).Equals("fuse + fuse-block", StringComparison.OrdinalIgnoreCase);
     }
 
+    private static bool IsDisconnect(string deviceType)
+    {
+        return NormalizeDeviceType(deviceType).Equals("disconnect", StringComparison.OrdinalIgnoreCase);
+    }
+
     private static void NormalizeFuseAssemblyDevice(CircuitNode node)
     {
-        if (!IsFuseBlockAssembly(node.DeviceType) || node.Device == null)
+        if ((!IsFuseBlockAssembly(node.DeviceType) && !(IsDisconnect(node.DeviceType) && node.Device?.IsFusedDisconnect == true))
+            || node.Device == null)
             return;
 
         var device = node.Device;
@@ -777,6 +808,15 @@ public partial class MainWindow : Window
             device.FusePartNumber = device.PartNumber;
             device.FuseInternalPartNumber = device.InternalPartNumber;
         }
+
+        if (!device.OcpdAmps.HasValue && device.FuseAmps.HasValue)
+            device.OcpdAmps = device.FuseAmps;
+    }
+
+    private static void NormalizeFusedDisconnect(Device device)
+    {
+        if (!device.IsFusedDisconnect)
+            return;
 
         if (!device.OcpdAmps.HasValue && device.FuseAmps.HasValue)
             device.OcpdAmps = device.FuseAmps;
@@ -1137,7 +1177,11 @@ public partial class MainWindow : Window
     {
         var device = entry.ToDevice();
         if (!IsFuseBlockAssembly(entry.DeviceType))
+        {
+            if (IsDisconnect(entry.DeviceType))
+                NormalizeFusedDisconnect(device);
             return device;
+        }
 
         if (string.IsNullOrWhiteSpace(device.FuseManufacturer) && string.IsNullOrWhiteSpace(device.FusePartNumber))
         {
@@ -1258,7 +1302,7 @@ public partial class MainWindow : Window
 
             csv.AppendLine();
             csv.AppendLine("Circuit Devices");
-            csv.AppendLine("Path,Node,Device Type,Manufacturer,Part Number,IPN,Description,Image Path,Voltage,SCCR,Interrupting Rating,OCPD Amp Rating,Input Current,Fuse Manufacturer,Fuse Part Number,Fuse IPN,Fuse Class,Fuse Amps,Let-Through Current,Source,Notes,Exempt,Exempt Reason");
+            csv.AppendLine("Path,Node,Device Type,Manufacturer,Part Number,IPN,Description,Image Path,Voltage,SCCR,Interrupting Rating,OCPD Amp Rating,Input Current,Fused Disconnect,Fuse Manufacturer,Fuse Part Number,Fuse IPN,Fuse Class,Fuse Amps,Let-Through Current,Source,Notes,Exempt,Exempt Reason");
             AppendDeviceRows(csv, _rootNode, _rootNode.Name);
 
             File.WriteAllText(filePath, csv.ToString(), Encoding.UTF8);
@@ -1306,6 +1350,7 @@ public partial class MainWindow : Window
             FormatCsv(device?.InterruptingRating),
             FormatCsv(device?.OcpdAmps),
             FormatCsv(device?.InputCurrentAmps),
+            FormatCsv(device?.IsFusedDisconnect),
             FormatCsv(device?.FuseManufacturer),
             FormatCsv(device?.FusePartNumber),
             FormatCsv(device?.FuseInternalPartNumber),
