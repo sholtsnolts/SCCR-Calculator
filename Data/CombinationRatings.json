@@ -1,0 +1,36 @@
+{
+  "combinationRatings": [
+    {
+      "id": "eaton-disconnect-lpj-100sp",
+      "upstreamDevice": "Eaton R9K3100FJ",
+      "ocpdType": "Class J Fuse",
+      "ocpdMaxAmps": 100,
+      "resultingSccrKa": 100,
+      "downstreamMinSccrKa": 10,
+      "downstreamDeviceTypes": [
+        "power-distribution-block",
+        "fuse-block",
+        "fuse + fuse-block"
+      ],
+      "voltage": 480,
+      "source": "Eaton combination rating",
+      "notes": "With LPJ-100SP Class J fuses"
+    },
+    {
+      "id": "bussmann-cc-fuse-combo",
+      "upstreamDevice": "Bussmann LP-CC Fuse",
+      "ocpdType": "Class CC Fuse",
+      "ocpdMaxAmps": 60,
+      "resultingSccrKa": 65,
+      "downstreamMinSccrKa": 5,
+      "downstreamDeviceTypes": [
+        "control-transformer",
+        "power-supply",
+        "drive"
+      ],
+      "voltage": 480,
+      "source": "Bussmann application note",
+      "notes": "Provides improved let-through protection"
+    }
+  ]
+}

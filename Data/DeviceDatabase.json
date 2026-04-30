@@ -1,0 +1,111 @@
+{
+  "devices": [
+    {
+      "id": "eaton-r9k3100",
+      "manufacturer": "Eaton",
+      "partNumber": "R9K3100FJ",
+      "internalPartNumber": "",
+      "description": "Safety Switch/Disconnect",
+      "deviceType": "disconnect",
+      "voltage": 480,
+      "sccrRating": 65,
+      "interruptingRating": 65,
+      "ocpdAmps": 100,
+      "source": "Eaton datasheet"
+    },
+    {
+      "id": "bussmann-lpj-100sp",
+      "manufacturer": "Bussmann",
+      "partNumber": "LPJ-100SP",
+      "internalPartNumber": "",
+      "description": "Class J Fast-Acting Fuse",
+      "deviceType": "fuse + fuse-block",
+      "voltage": 480,
+      "fuseManufacturer": "Bussmann",
+      "fusePartNumber": "LPJ-100SP",
+      "fuseInternalPartNumber": "",
+      "fuseClass": "J",
+      "fuseAmps": 100,
+      "ocpdAmps": 100,
+      "interruptingRating": 200,
+      "source": "Bussmann datasheet"
+    },
+    {
+      "id": "bussmann-lp-cc-60",
+      "manufacturer": "Bussmann",
+      "partNumber": "LP-CC-60",
+      "internalPartNumber": "",
+      "description": "Class CC Fast-Acting Fuse",
+      "deviceType": "fuse + fuse-block",
+      "voltage": 480,
+      "fuseManufacturer": "Bussmann",
+      "fusePartNumber": "LP-CC-60",
+      "fuseInternalPartNumber": "",
+      "fuseClass": "CC",
+      "fuseAmps": 60,
+      "ocpdAmps": 60,
+      "interruptingRating": 200,
+      "source": "Bussmann datasheet"
+    },
+    {
+      "id": "eaton-pdbfs330",
+      "manufacturer": "Eaton",
+      "partNumber": "PDBFS330",
+      "internalPartNumber": "",
+      "description": "Power Distribution Block",
+      "deviceType": "power-distribution-block",
+      "voltage": 480,
+      "sccrRating": 10,
+      "source": "UL 508A SB4.1 default"
+    },
+    {
+      "id": "wago-fuse-block",
+      "manufacturer": "Wago",
+      "partNumber": "847-431",
+      "internalPartNumber": "",
+      "description": "Fuse Block",
+      "deviceType": "fuse + fuse-block",
+      "voltage": 480,
+      "sccrRating": 10,
+      "fuseManufacturer": "",
+      "fusePartNumber": "",
+      "fuseInternalPartNumber": "",
+      "source": "UL 508A SB4.1 default"
+    },
+    {
+      "id": "yaskawa-sgdv",
+      "manufacturer": "Yaskawa",
+      "partNumber": "SGDV-750H21A100",
+      "internalPartNumber": "",
+      "description": "Vector Drive 75 kW",
+      "deviceType": "drive",
+      "voltage": 480,
+      "inputCurrentAmps": null,
+      "sccrRating": 5,
+      "source": "Drive datasheet"
+    },
+    {
+      "id": "schneider-atv",
+      "manufacturer": "Schneider",
+      "partNumber": "ATV320U30N4C",
+      "internalPartNumber": "",
+      "description": "ATV Variable Speed Drive",
+      "deviceType": "drive",
+      "voltage": 480,
+      "inputCurrentAmps": null,
+      "sccrRating": 5,
+      "source": "Drive datasheet"
+    },
+    {
+      "id": "generic-transformer",
+      "manufacturer": "Generic",
+      "partNumber": "XFMR-30KVA",
+      "internalPartNumber": "",
+      "description": "Transformer 30 kVA",
+      "deviceType": "transformer",
+      "voltage": 480,
+      "sccrRating": 5,
+      "source": "UL 508A SB4.1 default"
+    }
+  ]
+}

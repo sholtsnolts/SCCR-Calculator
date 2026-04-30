@@ -1,0 +1,133 @@
+﻿<Window x:Class="SccrWpfApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="SCCR WPF Calculator - UL 508A" Height="800" Width="1400">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="New" Click="MenuNewProject_Click"/>
+                <MenuItem Header="Open..." Click="MenuOpenProject_Click"/>
+                <MenuItem Header="Save As..." Click="MenuSaveProject_Click"/>
+                <Separator/>
+                <MenuItem Header="Export CSV Report..." Click="MenuExportReport_Click"/>
+                <Separator/>
+                <MenuItem Header="Exit" Click="MenuExit_Click"/>
+            </MenuItem>
+            <MenuItem Header="Edit">
+                <MenuItem Header="Add Branch" Click="MenuAddBranch_Click"/>
+                <MenuItem Header="Remove Node" Click="MenuRemoveNode_Click"/>
+            </MenuItem>
+            <MenuItem Header="Tools">
+                <MenuItem Header="Calculate SCCR" Click="MenuRecalculate_Click"/>
+                <Separator/>
+                <MenuItem Header="Insert Device from Database..." Click="MenuInsertDeviceFromDatabase_Click"/>
+                <MenuItem Header="Manage Device Database..." Click="MenuManageDeviceDatabase_Click"/>
+                <MenuItem Header="Add Selected Device to Database..." Click="MenuAddSelectedDeviceToDatabase_Click"/>
+                <Separator/>
+                <MenuItem Header="Import Device Database..." Click="MenuImportDeviceDatabase_Click"/>
+                <MenuItem Header="Export Device Database..." Click="MenuExportDeviceDatabase_Click"/>
+                <MenuItem Header="Set Device Database Path..." Click="MenuSetDeviceDatabasePath_Click"/>
+            </MenuItem>
+        </Menu>
+
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Background="LightGray">
+            <Button Click="ButtonAddNode_Click" Padding="5" Margin="5">Add Node</Button>
+            <Button Click="ButtonInsertDeviceFromDatabase_Click" Padding="5" Margin="5">Insert Device</Button>
+            <Button Click="ButtonManageDeviceDatabase_Click" Padding="5" Margin="5">Device DB</Button>
+            <Button Click="ButtonRemoveNode_Click" Padding="5" Margin="5">Remove</Button>
+            <TextBlock Text="Available Fault Current (kA):" VerticalAlignment="Center" Margin="15,0,5,0"/>
+            <TextBox Name="AvailableFaultCurrentTextBox" Text="100" Width="60" Padding="5" Margin="0,5,5,5"/>
+            <Button Click="ButtonCalculate_Click" Padding="5" Margin="5" Background="Green" Foreground="White">Calculate</Button>
+            <CheckBox Name="FlowchartViewCheckBox" Content="Flowchart View" VerticalAlignment="Center" Margin="15,0,5,0" Checked="FlowchartViewCheckBox_Changed" Unchecked="FlowchartViewCheckBox_Changed"/>
+        </StackPanel>
+
+        <Grid DockPanel.Dock="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="400"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="5"/>
+                <RowDefinition Height="150"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Column="0" Grid.Row="0" Background="White">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="Circuit Tree" FontWeight="Bold" Background="LightGray" Padding="5"/>
+                <TreeView Grid.Row="1" Name="CircuitTreeView" ItemsSource="{Binding RootNode.Children}" SelectedItemChanged="CircuitTreeView_SelectedItemChanged" PreviewMouseRightButtonDown="CircuitTreeView_PreviewMouseRightButtonDown">
+                    <TreeView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Add Branch" Click="TreeMenuAddBranch_Click"/>
+                            <MenuItem Header="Insert Device from Database..." Click="TreeMenuInsertDevice_Click"/>
+                            <MenuItem Header="Edit Branch" Click="TreeMenuEditBranch_Click"/>
+                            <Separator/>
+                            <MenuItem Header="Remove" Click="TreeMenuRemoveNode_Click"/>
+                        </ContextMenu>
+                    </TreeView.ContextMenu>
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Name}" Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding DeviceType}" FontSize="10" Foreground="Gray"/>
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+                <ScrollViewer Grid.Row="1" Name="FlowchartScrollViewer" Visibility="Collapsed" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Name="FlowchartPanel" Margin="8"/>
+                </ScrollViewer>
+            </Grid>
+
+            <GridSplitter Grid.Column="1" Grid.Row="0" HorizontalAlignment="Stretch" Background="Gray"/>
+
+            <Grid Grid.Column="2" Grid.Row="0" Background="White">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="Device Properties" FontWeight="Bold" Background="LightGray" Padding="5"/>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Name="PropertyPanel" Margin="10">
+                        <TextBlock Text="Select a node to edit" Foreground="Gray"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+
+            <GridSplitter Grid.Column="3" Grid.Row="0" HorizontalAlignment="Stretch" Background="Gray"/>
+
+            <Grid Grid.Column="4" Grid.Row="0" Background="White">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="SCCR Results" FontWeight="Bold" Background="LightGray" Padding="5"/>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Name="ResultsPanel" Margin="10">
+                        <TextBlock Text="Click Calculate to run" Foreground="Gray"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+
+            <GridSplitter Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="5" Height="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Gray"/>
+
+            <Grid Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="5" Background="White">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="Calculation Log" FontWeight="Bold" Background="LightGray" Padding="5"/>
+                <ListBox Grid.Row="1" Name="LogListBox" ItemsSource="{Binding CalculationLog}" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+            </Grid>
+        </Grid>
+    </DockPanel>
+</Window>

@@ -1,0 +1,94 @@
+{
+  "fuses": [
+    {
+      "fuseClass": "J",
+      "ampRating": 30,
+      "letThroughCurrent": [
+        {
+          "faultCurrentKa": 50,
+          "peakLetThroughKa": 28
+        },
+        {
+          "faultCurrentKa": 100,
+          "peakLetThroughKa": 35
+        },
+        {
+          "faultCurrentKa": 200,
+          "peakLetThroughKa": 40
+        }
+      ]
+    },
+    {
+      "fuseClass": "J",
+      "ampRating": 60,
+      "letThroughCurrent": [
+        {
+          "faultCurrentKa": 50,
+          "peakLetThroughKa": 35
+        },
+        {
+          "faultCurrentKa": 100,
+          "peakLetThroughKa": 45
+        },
+        {
+          "faultCurrentKa": 200,
+          "peakLetThroughKa": 55
+        }
+      ]
+    },
+    {
+      "fuseClass": "J",
+      "ampRating": 100,
+      "letThroughCurrent": [
+        {
+          "faultCurrentKa": 50,
+          "peakLetThroughKa": 55
+        },
+        {
+          "faultCurrentKa": 100,
+          "peakLetThroughKa": 65
+        },
+        {
+          "faultCurrentKa": 200,
+          "peakLetThroughKa": 80
+        }
+      ]
+    },
+    {
+      "fuseClass": "CC",
+      "ampRating": 30,
+      "letThroughCurrent": [
+        {
+          "faultCurrentKa": 50,
+          "peakLetThroughKa": 12
+        },
+        {
+          "faultCurrentKa": 100,
+          "peakLetThroughKa": 15
+        },
+        {
+          "faultCurrentKa": 200,
+          "peakLetThroughKa": 20
+        }
+      ]
+    },
+    {
+      "fuseClass": "CC",
+      "ampRating": 60,
+      "letThroughCurrent": [
+        {
+          "faultCurrentKa": 50,
+          "peakLetThroughKa": 18
+        },
+        {
+          "faultCurrentKa": 100,
+          "peakLetThroughKa": 25
+        },
+        {
+          "faultCurrentKa": 200,
+          "peakLetThroughKa": 35
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "source": "UL 508A Table 28.1 ampacities of insulated conductors",
+  "conductorMaterial": "Copper",
+  "defaultTemperatureColumn": "75C",
+  "entries": [
+    { "conductorSize": "14 AWG", "copper60CAmps": 15, "copper75CAmps": 15 },
+    { "conductorSize": "12 AWG", "copper60CAmps": 20, "copper75CAmps": 20 },
+    { "conductorSize": "10 AWG", "copper60CAmps": 30, "copper75CAmps": 30 },
+    { "conductorSize": "8 AWG", "copper60CAmps": 40, "copper75CAmps": 50 },
+    { "conductorSize": "6 AWG", "copper60CAmps": 55, "copper75CAmps": 65 },
+    { "conductorSize": "4 AWG", "copper60CAmps": 70, "copper75CAmps": 85 },
+    { "conductorSize": "3 AWG", "copper60CAmps": 85, "copper75CAmps": 100 },
+    { "conductorSize": "2 AWG", "copper60CAmps": 95, "copper75CAmps": 115 },
+    { "conductorSize": "1 AWG", "copper60CAmps": 110, "copper75CAmps": 130 },
+    { "conductorSize": "1/0 AWG", "copper60CAmps": 125, "copper75CAmps": 150 },
+    { "conductorSize": "2/0 AWG", "copper60CAmps": 145, "copper75CAmps": 175 },
+    { "conductorSize": "3/0 AWG", "copper60CAmps": 165, "copper75CAmps": 200 },
+    { "conductorSize": "4/0 AWG", "copper60CAmps": 195, "copper75CAmps": 230 },
+    { "conductorSize": "250 kcmil", "copper60CAmps": 215, "copper75CAmps": 255 },
+    { "conductorSize": "300 kcmil", "copper60CAmps": 240, "copper75CAmps": 285 },
+    { "conductorSize": "350 kcmil", "copper60CAmps": 260, "copper75CAmps": 310 },
+    { "conductorSize": "400 kcmil", "copper60CAmps": 280, "copper75CAmps": 335 },
+    { "conductorSize": "500 kcmil", "copper60CAmps": 320, "copper75CAmps": 380 },
+    { "conductorSize": "600 kcmil", "copper60CAmps": 355, "copper75CAmps": 420 },
+    { "conductorSize": "700 kcmil", "copper60CAmps": 385, "copper75CAmps": 460 },
+    { "conductorSize": "750 kcmil", "copper60CAmps": 400, "copper75CAmps": 475 },
+    { "conductorSize": "800 kcmil", "copper60CAmps": 410, "copper75CAmps": 490 },
+    { "conductorSize": "900 kcmil", "copper60CAmps": 435, "copper75CAmps": 520 },
+    { "conductorSize": "1000 kcmil", "copper60CAmps": 455, "copper75CAmps": 545 }
+  ]
+}

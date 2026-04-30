@@ -1,0 +1,54 @@
+{
+  "defaultSccrValues": [
+    {
+      "componentType": "power-distribution-block",
+      "defaultSccrKa": 5,
+      "source": "UL 508A SB4.1"
+    },
+    {
+      "componentType": "fuse-block",
+      "defaultSccrKa": 10,
+      "source": "UL 508A SB4.1"
+    },
+    {
+      "componentType": "fuse + fuse-block",
+      "defaultSccrKa": 10,
+      "source": "UL 508A SB4.1 fuse block default"
+    },
+    {
+      "componentType": "terminal-block",
+      "defaultSccrKa": 5,
+      "source": "UL 508A SB4.1"
+    },
+    {
+      "componentType": "contactor",
+      "defaultSccrKa": 5,
+      "source": "UL 508A SB4.1"
+    },
+    {
+      "componentType": "starter",
+      "defaultSccrKa": 5,
+      "source": "UL 508A SB4.1"
+    },
+    {
+      "componentType": "transformer",
+      "defaultSccrKa": 5,
+      "source": "UL 508A SB4.1"
+    },
+    {
+      "componentType": "drive",
+      "defaultSccrKa": 5,
+      "source": "UL 508A SB4.1"
+    },
+    {
+      "componentType": "power-supply",
+      "defaultSccrKa": 5,
+      "source": "UL 508A SB4.1"
+    },
+    {
+      "componentType": "brake-resistor",
+      "defaultSccrKa": 5,
+      "source": "UL 508A SB4.1"
+    }
+  ]
+}
