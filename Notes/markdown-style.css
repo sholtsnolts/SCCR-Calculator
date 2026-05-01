@@ -1,0 +1,20 @@
+body {
+    font-size: 11px;
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: 14px;
+}
+
+h2 {
+    font-size: 12px;
+}
+
+h3 {
+    font-size: 12px;
+}
+
+code, pre {
+    font-size: 11px;
+}

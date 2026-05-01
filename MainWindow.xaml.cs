@@ -188,6 +188,16 @@ public partial class MainWindow : Window
         ExportDeviceDatabase();
     }
 
+    private void MenuImportDeviceDatabaseCsv_Click(object sender, RoutedEventArgs e)
+    {
+        ImportDeviceDatabaseCsv();
+    }
+
+    private void MenuExportDeviceDatabaseCsv_Click(object sender, RoutedEventArgs e)
+    {
+        ExportDeviceDatabaseCsv();
+    }
+
     private void MenuSetDeviceDatabasePath_Click(object sender, RoutedEventArgs e)
     {
         SetDeviceDatabasePath();
@@ -367,6 +377,35 @@ public partial class MainWindow : Window
         if (hasFuseSection)
         {
             AddSectionHeader(panel, isDisconnect ? "Disconnect Fuses" : "Fuse");
+            var fuseButtonPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(120, 4, 0, 4)
+            };
+
+            var selectFuseButton = new Button
+            {
+                Content = "Select Fuse from Database",
+                Padding = new Thickness(5),
+                Margin = new Thickness(0, 0, 5, 0)
+            };
+            selectFuseButton.Click += (_, _) => SelectFuseFromDatabase(node);
+
+            var clearFuseButton = new Button
+            {
+                Content = "Clear Fuse",
+                Padding = new Thickness(5)
+            };
+            clearFuseButton.Click += (_, _) =>
+            {
+                ClearFuseSelection(device);
+                DisplayNodeProperties(node);
+            };
+
+            fuseButtonPanel.Children.Add(selectFuseButton);
+            fuseButtonPanel.Children.Add(clearFuseButton);
+            panel.Children.Add(fuseButtonPanel);
+
             AddPropertyField(panel, "Fuse Mfg:", device.FuseManufacturer, (value) => device.FuseManufacturer = value);
             AddPropertyField(panel, "Fuse Part #:", device.FusePartNumber, (value) => device.FusePartNumber = value);
             AddPropertyField(panel, "Fuse IPN:", device.FuseInternalPartNumber, (value) => device.FuseInternalPartNumber = value);
@@ -1083,6 +1122,69 @@ public partial class MainWindow : Window
         }
     }
 
+    private void SelectFuseFromDatabase(CircuitNode node)
+    {
+        if (node.Device == null)
+            return;
+
+        var dialog = new DeviceDatabaseWindow(
+            _deviceDatabaseService,
+            allowInsert: true,
+            IsFuseDatabaseEntry,
+            selectionOnly: true)
+        {
+            Owner = this,
+            Title = "Select Fuse"
+        };
+
+        if (dialog.ShowDialog() != true || dialog.SelectedEntry == null)
+            return;
+
+        ApplyFuseSelection(node.Device, dialog.SelectedEntry);
+        DisplayNodeProperties(node);
+        RefreshCircuitViewMode();
+        ClearResultsPanel();
+    }
+
+    private static bool IsFuseDatabaseEntry(DeviceDatabaseEntry entry)
+    {
+        return entry.DeviceType.Equals("fuse", StringComparison.OrdinalIgnoreCase)
+            || !string.IsNullOrWhiteSpace(entry.FuseClass)
+            || entry.FuseAmps.HasValue
+            || !string.IsNullOrWhiteSpace(entry.FusePartNumber);
+    }
+
+    private static void ApplyFuseSelection(Device target, DeviceDatabaseEntry fuseEntry)
+    {
+        target.FuseManufacturer = FirstNonEmpty(fuseEntry.FuseManufacturer, fuseEntry.Manufacturer);
+        target.FusePartNumber = FirstNonEmpty(fuseEntry.FusePartNumber, fuseEntry.PartNumber);
+        target.FuseInternalPartNumber = FirstNonEmpty(fuseEntry.FuseInternalPartNumber, fuseEntry.InternalPartNumber);
+        target.FuseClass = fuseEntry.FuseClass;
+        target.FuseAmps = fuseEntry.FuseAmps;
+        target.LetThroughCurrent = fuseEntry.LetThroughCurrent;
+
+        if (fuseEntry.InterruptingRating.HasValue)
+            target.InterruptingRating = fuseEntry.InterruptingRating;
+
+        if (fuseEntry.FuseAmps.HasValue)
+            target.OcpdAmps = fuseEntry.FuseAmps;
+    }
+
+    private static void ClearFuseSelection(Device device)
+    {
+        device.FuseManufacturer = "";
+        device.FusePartNumber = "";
+        device.FuseInternalPartNumber = "";
+        device.FuseClass = "";
+        device.FuseAmps = null;
+        device.LetThroughCurrent = null;
+    }
+
+    private static string FirstNonEmpty(params string[] values)
+    {
+        return values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value)) ?? "";
+    }
+
     private void ImportDeviceDatabase()
     {
         var dialog = new OpenFileDialog
@@ -1135,6 +1237,61 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             MessageBox.Show(this, $"Unable to export device database: {ex.Message}", "Export Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void ImportDeviceDatabaseCsv()
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = "Import Device Database CSV",
+            Filter = "CSV Files (*.csv)|*.csv|All Files (*.*)|*.*"
+        };
+
+        if (dialog.ShowDialog(this) != true)
+            return;
+
+        var response = MessageBox.Show(
+            this,
+            "Importing CSV will replace the currently selected device database. Continue?",
+            "Import Device Database CSV",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (response != MessageBoxResult.Yes)
+            return;
+
+        try
+        {
+            _deviceDatabaseService.ImportDatabaseCsv(dialog.FileName);
+            MessageBox.Show(this, "Device database CSV imported.", "Import Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, $"Unable to import CSV: {ex.Message}", "Import Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void ExportDeviceDatabaseCsv()
+    {
+        var dialog = new SaveFileDialog
+        {
+            Title = "Export Device Database CSV",
+            Filter = "CSV Files (*.csv)|*.csv|All Files (*.*)|*.*",
+            FileName = "DeviceDatabase.csv"
+        };
+
+        if (dialog.ShowDialog(this) != true)
+            return;
+
+        try
+        {
+            _deviceDatabaseService.ExportDatabaseCsv(dialog.FileName);
+            MessageBox.Show(this, "Device database CSV exported.", "Export Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(this, $"Unable to export CSV: {ex.Message}", "Export Failed", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 

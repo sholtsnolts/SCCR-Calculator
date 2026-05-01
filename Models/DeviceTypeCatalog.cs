@@ -7,6 +7,7 @@ namespace SccrWpfApp.Models
             "feeder",
             "branch",
             "disconnect",
+            "fuse",
             "breaker",
             "fuse + fuse-block",
             "power-distribution-block",

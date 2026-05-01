@@ -29,6 +29,8 @@
                 <Separator/>
                 <MenuItem Header="Import Device Database..." Click="MenuImportDeviceDatabase_Click"/>
                 <MenuItem Header="Export Device Database..." Click="MenuExportDeviceDatabase_Click"/>
+                <MenuItem Header="Import Device Database CSV..." Click="MenuImportDeviceDatabaseCsv_Click"/>
+                <MenuItem Header="Export Device Database CSV..." Click="MenuExportDeviceDatabaseCsv_Click"/>
                 <MenuItem Header="Set Device Database Path..." Click="MenuSetDeviceDatabasePath_Click"/>
             </MenuItem>
         </Menu>

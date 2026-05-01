@@ -201,7 +201,7 @@ namespace SccrWpfApp
             _manufacturerTextBox.Text = Entry.Manufacturer;
             _partNumberTextBox.Text = Entry.PartNumber;
             _internalPartNumberTextBox.Text = Entry.InternalPartNumber;
-            Entry.DeviceType = NormalizeDeviceType(Entry.DeviceType);
+            Entry.DeviceType = NormalizeDatabaseDeviceType(Entry.DeviceType);
             var knownType = DeviceTypeCatalog.KnownTypes.FirstOrDefault(type =>
                 type.Equals(Entry.DeviceType, StringComparison.OrdinalIgnoreCase));
             _deviceTypeComboBox.SelectedItem = knownType ?? "other";
@@ -240,7 +240,7 @@ namespace SccrWpfApp
             Entry.Manufacturer = _manufacturerTextBox.Text.Trim();
             Entry.PartNumber = _partNumberTextBox.Text.Trim();
             Entry.InternalPartNumber = _internalPartNumberTextBox.Text.Trim();
-            Entry.DeviceType = NormalizeDeviceType(_deviceTypeComboBox.SelectedItem?.ToString() == "other"
+            Entry.DeviceType = NormalizeDatabaseDeviceType(_deviceTypeComboBox.SelectedItem?.ToString() == "other"
                 ? _customDeviceTypeTextBox.Text.Trim()
                 : _deviceTypeComboBox.SelectedItem?.ToString() ?? "");
             Entry.Description = _descriptionTextBox.Text.Trim();
@@ -281,11 +281,10 @@ namespace SccrWpfApp
                 : null;
         }
 
-        private static string NormalizeDeviceType(string? deviceType)
+        private static string NormalizeDatabaseDeviceType(string? deviceType)
         {
             var value = (deviceType ?? "").Trim();
-            return value.Equals("fuse", StringComparison.OrdinalIgnoreCase)
-                || value.Equals("fuse-block", StringComparison.OrdinalIgnoreCase)
+            return value.Equals("fuse-block", StringComparison.OrdinalIgnoreCase)
                 || value.Equals("fuse block", StringComparison.OrdinalIgnoreCase)
                 || value.Equals("fuse + fuse block", StringComparison.OrdinalIgnoreCase)
                 ? "fuse + fuse-block"

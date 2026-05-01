@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -76,11 +77,121 @@ namespace SccrWpfApp.Services
             File.Copy(_databasePath, destinationPath, overwrite: true);
         }
 
+        public void ExportDatabaseCsv(string destinationPath)
+        {
+            var devices = LoadDevices();
+            var lines = new List<string>
+            {
+                string.Join(",",
+                    Csv("Manufacturer"),
+                    Csv("PartNumber"),
+                    Csv("InternalPartNumber"),
+                    Csv("DeviceType"),
+                    Csv("Description"),
+                    Csv("ImagePath"),
+                    Csv("Voltage"),
+                    Csv("SccrRating"),
+                    Csv("InterruptingRating"),
+                    Csv("OcpdAmps"),
+                    Csv("InputCurrentAmps"),
+                    Csv("IsFusedDisconnect"),
+                    Csv("FuseManufacturer"),
+                    Csv("FusePartNumber"),
+                    Csv("FuseInternalPartNumber"),
+                    Csv("FuseClass"),
+                    Csv("FuseAmps"),
+                    Csv("LetThroughCurrent"),
+                    Csv("Source"),
+                    Csv("Notes"),
+                    Csv("ExemptFromSccr"),
+                    Csv("ExemptReason"))
+            };
+
+            foreach (var device in devices)
+            {
+                lines.Add(string.Join(",",
+                    Csv(device.Manufacturer),
+                    Csv(device.PartNumber),
+                    Csv(device.InternalPartNumber),
+                    Csv(device.DeviceType),
+                    Csv(device.Description),
+                    Csv(device.ImagePath),
+                    Csv(device.Voltage),
+                    Csv(device.SccrRating),
+                    Csv(device.InterruptingRating),
+                    Csv(device.OcpdAmps),
+                    Csv(device.InputCurrentAmps),
+                    Csv(device.IsFusedDisconnect),
+                    Csv(device.FuseManufacturer),
+                    Csv(device.FusePartNumber),
+                    Csv(device.FuseInternalPartNumber),
+                    Csv(device.FuseClass),
+                    Csv(device.FuseAmps),
+                    Csv(device.LetThroughCurrent),
+                    Csv(device.Source),
+                    Csv(device.Notes),
+                    Csv(device.ExemptFromSccr),
+                    Csv(device.ExemptReason)));
+            }
+
+            File.WriteAllLines(destinationPath, lines);
+        }
+
         public void ImportDatabase(string sourcePath)
         {
             ValidateDatabaseFile(sourcePath);
             EnsureUserDatabaseExists();
             File.Copy(sourcePath, _databasePath, overwrite: true);
+        }
+
+        public void ImportDatabaseCsv(string sourcePath)
+        {
+            var rows = ReadCsvRows(sourcePath);
+            if (rows.Count == 0)
+                throw new InvalidDataException("CSV file is empty.");
+
+            var headers = rows[0]
+                .Select((header, index) => new { Header = NormalizeHeader(header), Index = index })
+                .Where(item => !string.IsNullOrWhiteSpace(item.Header))
+                .ToDictionary(item => item.Header, item => item.Index, StringComparer.OrdinalIgnoreCase);
+
+            var devices = new List<DeviceDatabaseEntry>();
+            foreach (var row in rows.Skip(1))
+            {
+                var entry = new DeviceDatabaseEntry
+                {
+                    Manufacturer = GetCsv(row, headers, "manufacturer"),
+                    PartNumber = GetCsv(row, headers, "partnumber"),
+                    InternalPartNumber = GetCsv(row, headers, "internalpartnumber", "ipn"),
+                    DeviceType = GetCsv(row, headers, "devicetype"),
+                    Description = GetCsv(row, headers, "description"),
+                    ImagePath = GetCsv(row, headers, "imagepath"),
+                    Voltage = GetCsvDouble(row, headers, "voltage"),
+                    SccrRating = GetCsvDouble(row, headers, "sccrrating", "sccr"),
+                    InterruptingRating = GetCsvDouble(row, headers, "interruptingrating", "ir"),
+                    OcpdAmps = GetCsvDouble(row, headers, "ocpdamps", "ocpdamprating"),
+                    InputCurrentAmps = GetCsvDouble(row, headers, "inputcurrentamps", "inputcurrent"),
+                    IsFusedDisconnect = GetCsvBool(row, headers, "isfuseddisconnect", "fuseddisconnect"),
+                    FuseManufacturer = GetCsv(row, headers, "fusemanufacturer"),
+                    FusePartNumber = GetCsv(row, headers, "fusepartnumber"),
+                    FuseInternalPartNumber = GetCsv(row, headers, "fuseinternalpartnumber", "fuseipn"),
+                    FuseClass = GetCsv(row, headers, "fuseclass"),
+                    FuseAmps = GetCsvDouble(row, headers, "fuseamps", "fusea"),
+                    LetThroughCurrent = GetCsvDouble(row, headers, "letthroughcurrent"),
+                    Source = GetCsv(row, headers, "source"),
+                    Notes = GetCsv(row, headers, "notes"),
+                    ExemptFromSccr = GetCsvBool(row, headers, "exemptfromsccr"),
+                    ExemptReason = GetCsv(row, headers, "exemptreason")
+                };
+
+                if (string.IsNullOrWhiteSpace(entry.Manufacturer) && string.IsNullOrWhiteSpace(entry.PartNumber))
+                    continue;
+
+                entry.Id = DeviceDatabaseEntry.CreateId(entry.Manufacturer, entry.PartNumber);
+                devices.Add(entry);
+            }
+
+            SaveDevices(devices);
         }
 
         public void SetDatabasePath(string databasePath)
@@ -223,6 +334,103 @@ namespace SccrWpfApp.Services
                 WriteIndented = true,
                 PropertyNameCaseInsensitive = true
             };
+        }
+
+        private static string Csv(object? value)
+        {
+            var text = value switch
+            {
+                null => "",
+                double number => number.ToString(CultureInfo.InvariantCulture),
+                bool flag => flag ? "true" : "false",
+                _ => value.ToString() ?? ""
+            };
+
+            return text.Contains('"') || text.Contains(',') || text.Contains('\n') || text.Contains('\r')
+                ? "\"" + text.Replace("\"", "\"\"") + "\""
+                : text;
+        }
+
+        private static List<List<string>> ReadCsvRows(string sourcePath)
+        {
+            var rows = new List<List<string>>();
+            foreach (var line in File.ReadLines(sourcePath))
+            {
+                rows.Add(ParseCsvLine(line));
+            }
+
+            return rows;
+        }
+
+        private static List<string> ParseCsvLine(string line)
+        {
+            var values = new List<string>();
+            var current = new System.Text.StringBuilder();
+            var inQuotes = false;
+
+            for (var i = 0; i < line.Length; i++)
+            {
+                var ch = line[i];
+                if (ch == '"')
+                {
+                    if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
+                    {
+                        current.Append('"');
+                        i++;
+                    }
+                    else
+                    {
+                        inQuotes = !inQuotes;
+                    }
+                }
+                else if (ch == ',' && !inQuotes)
+                {
+                    values.Add(current.ToString());
+                    current.Clear();
+                }
+                else
+                {
+                    current.Append(ch);
+                }
+            }
+
+            values.Add(current.ToString());
+            return values;
+        }
+
+        private static string NormalizeHeader(string header)
+        {
+            return new string((header ?? "")
+                .Where(char.IsLetterOrDigit)
+                .Select(char.ToLowerInvariant)
+                .ToArray());
+        }
+
+        private static string GetCsv(List<string> row, Dictionary<string, int> headers, params string[] names)
+        {
+            foreach (var name in names)
+            {
+                if (headers.TryGetValue(NormalizeHeader(name), out var index) && index < row.Count)
+                    return row[index].Trim();
+            }
+
+            return "";
+        }
+
+        private static double? GetCsvDouble(List<string> row, Dictionary<string, int> headers, params string[] names)
+        {
+            var text = GetCsv(row, headers, names);
+            return double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var value)
+                ? value
+                : null;
+        }
+
+        private static bool GetCsvBool(List<string> row, Dictionary<string, int> headers, params string[] names)
+        {
+            var text = GetCsv(row, headers, names);
+            return text.Equals("true", StringComparison.OrdinalIgnoreCase)
+                || text.Equals("yes", StringComparison.OrdinalIgnoreCase)
+                || text.Equals("1", StringComparison.OrdinalIgnoreCase);
         }
 
         private class DeviceDatabaseFile

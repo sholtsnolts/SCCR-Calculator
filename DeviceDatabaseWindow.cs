@@ -15,6 +15,8 @@ namespace SccrWpfApp
         private readonly DeviceDatabaseService _deviceDatabaseService;
         private readonly ObservableCollection<DeviceDatabaseEntry> _devices;
         private readonly bool _allowInsert;
+        private readonly bool _selectionOnly;
+        private readonly Func<DeviceDatabaseEntry, bool>? _filter;
         private readonly DataGrid _deviceGrid = new();
         private readonly Image _previewImage = new();
         private readonly TextBlock _previewText = new();
@@ -23,10 +25,21 @@ namespace SccrWpfApp
         public DeviceDatabaseEntry? SelectedEntry { get; private set; }
 
         public DeviceDatabaseWindow(DeviceDatabaseService deviceDatabaseService, bool allowInsert)
+            : this(deviceDatabaseService, allowInsert, null, false)
+        {
+        }
+
+        public DeviceDatabaseWindow(
+            DeviceDatabaseService deviceDatabaseService,
+            bool allowInsert,
+            Func<DeviceDatabaseEntry, bool>? filter,
+            bool selectionOnly)
         {
             _deviceDatabaseService = deviceDatabaseService;
-            _devices = _deviceDatabaseService.LoadDevices();
             _allowInsert = allowInsert;
+            _filter = filter;
+            _selectionOnly = selectionOnly;
+            _devices = LoadFilteredDevices();
 
             Title = allowInsert ? "Insert Device from Database" : "Device Database";
             Width = 1180;
@@ -60,24 +73,39 @@ namespace SccrWpfApp
             insertButton.Click += (_, _) => InsertSelected();
 
             var addButton = new Button { Content = "Add New", Width = 90, Padding = new Thickness(5), Margin = new Thickness(5, 0, 0, 0) };
+            addButton.Visibility = _selectionOnly ? Visibility.Collapsed : Visibility.Visible;
             addButton.Click += (_, _) => AddNewDevice();
 
             var editButton = new Button { Content = "Edit Selected", Width = 105, Padding = new Thickness(5), Margin = new Thickness(5, 0, 0, 0) };
+            editButton.Visibility = _selectionOnly ? Visibility.Collapsed : Visibility.Visible;
             editButton.Click += (_, _) => EditSelectedDevice();
 
             var deleteButton = new Button { Content = "Delete", Width = 80, Padding = new Thickness(5), Margin = new Thickness(5, 0, 0, 0) };
+            deleteButton.Visibility = _selectionOnly ? Visibility.Collapsed : Visibility.Visible;
             deleteButton.Click += (_, _) => DeleteSelectedDevice();
 
             var saveButton = new Button { Content = "Save Database", Width = 115, Padding = new Thickness(5), Margin = new Thickness(5, 0, 0, 0) };
+            saveButton.Visibility = _selectionOnly ? Visibility.Collapsed : Visibility.Visible;
             saveButton.Click += (_, _) => SaveDatabase();
 
             var importButton = new Button { Content = "Import", Width = 80, Padding = new Thickness(5), Margin = new Thickness(5, 0, 0, 0) };
+            importButton.Visibility = _selectionOnly ? Visibility.Collapsed : Visibility.Visible;
             importButton.Click += (_, _) => ImportDatabase();
 
             var exportButton = new Button { Content = "Export", Width = 80, Padding = new Thickness(5), Margin = new Thickness(5, 0, 0, 0) };
+            exportButton.Visibility = _selectionOnly ? Visibility.Collapsed : Visibility.Visible;
             exportButton.Click += (_, _) => ExportDatabase();
 
+            var importCsvButton = new Button { Content = "Import CSV", Width = 95, Padding = new Thickness(5), Margin = new Thickness(5, 0, 0, 0) };
+            importCsvButton.Visibility = _selectionOnly ? Visibility.Collapsed : Visibility.Visible;
+            importCsvButton.Click += (_, _) => ImportDatabaseCsv();
+
+            var exportCsvButton = new Button { Content = "Export CSV", Width = 95, Padding = new Thickness(5), Margin = new Thickness(5, 0, 0, 0) };
+            exportCsvButton.Visibility = _selectionOnly ? Visibility.Collapsed : Visibility.Visible;
+            exportCsvButton.Click += (_, _) => ExportDatabaseCsv();
+
             var pathButton = new Button { Content = "Set Path", Width = 85, Padding = new Thickness(5), Margin = new Thickness(5, 0, 0, 0) };
+            pathButton.Visibility = _selectionOnly ? Visibility.Collapsed : Visibility.Visible;
             pathButton.Click += (_, _) => SetDatabasePath();
 
             var closeButton = new Button { Content = "Close", Width = 80, Padding = new Thickness(5), Margin = new Thickness(5, 0, 0, 0) };
@@ -90,6 +118,8 @@ namespace SccrWpfApp
             buttonPanel.Children.Add(saveButton);
             buttonPanel.Children.Add(importButton);
             buttonPanel.Children.Add(exportButton);
+            buttonPanel.Children.Add(importCsvButton);
+            buttonPanel.Children.Add(exportCsvButton);
             buttonPanel.Children.Add(pathButton);
             buttonPanel.Children.Add(closeButton);
             DockPanel.SetDock(buttonPanel, Dock.Bottom);
@@ -157,6 +187,15 @@ namespace SccrWpfApp
 
             if (_devices.Count > 0)
                 _deviceGrid.SelectedIndex = 0;
+        }
+
+        private ObservableCollection<DeviceDatabaseEntry> LoadFilteredDevices()
+        {
+            var devices = _deviceDatabaseService.LoadDevices();
+            if (_filter == null)
+                return devices;
+
+            return new ObservableCollection<DeviceDatabaseEntry>(devices.Where(_filter));
         }
 
         private void AddColumn(string header, string bindingPath, double width)
@@ -349,10 +388,66 @@ namespace SccrWpfApp
             }
         }
 
+        private void ImportDatabaseCsv()
+        {
+            var dialog = new OpenFileDialog
+            {
+                Title = "Import Device Database CSV",
+                Filter = "CSV Files (*.csv)|*.csv|All Files (*.*)|*.*"
+            };
+
+            if (dialog.ShowDialog(this) != true)
+                return;
+
+            var response = MessageBox.Show(
+                this,
+                "Importing CSV will replace the currently selected device database. Continue?",
+                "Import Device Database CSV",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (response != MessageBoxResult.Yes)
+                return;
+
+            try
+            {
+                _deviceDatabaseService.ImportDatabaseCsv(dialog.FileName);
+                ReloadDevices();
+                MessageBox.Show(this, "Device database CSV imported.", "Import Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, $"Unable to import CSV: {ex.Message}", "Import Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ExportDatabaseCsv()
+        {
+            var dialog = new SaveFileDialog
+            {
+                Title = "Export Device Database CSV",
+                Filter = "CSV Files (*.csv)|*.csv|All Files (*.*)|*.*",
+                FileName = "DeviceDatabase.csv"
+            };
+
+            if (dialog.ShowDialog(this) != true)
+                return;
+
+            try
+            {
+                _deviceDatabaseService.ExportDatabaseCsv(dialog.FileName);
+                MessageBox.Show(this, "Device database CSV exported.", "Export Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, $"Unable to export CSV: {ex.Message}", "Export Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void ReloadDevices()
         {
             _devices.Clear();
-            foreach (var device in _deviceDatabaseService.LoadDevices())
+            foreach (var device in LoadFilteredDevices())
             {
                 _devices.Add(device);
             }
